@@ -1,0 +1,55 @@
+#!/bin/bash
+source $(dirname ${BASH_SOURCE})/../../shf3/lib/header
+include ${HOME}/shf3.pssh/lib
+import gui
+import cluster/pssh
+
+function help/psshmgr() {
+  cat << EOF
+Usage: ${gbn} command ...
+              cmd  nodes commands - run commands on nodes
+              kill nodes what     - killall what proc on nodes
+              ps   nodes pattern  - grep ps for pattern on nodes
+              rc   nodes service action - do action on rc service on nodes
+              up   nodes          - show uptimes
+              nscd nodes ents     - invalidate nscd ent on nodes
+EOF
+  exit 1
+}
+
+### main
+if test $# -lt 2 ; then
+  help/psshmgr
+fi
+
+cmd="${1}"
+shift
+nds="${1}"
+shift
+case "${cmd}" in
+  cmd)
+    cluster/pssh/cmd "${nds}" $*
+  ;;
+  kill)
+    cluster/pssh/cmd "${nds}" "killall -9 $*"
+  ;;
+  ps)
+    cluster/pssh/cmd "${nds}" "ps aux | grep $* | grep -v grep"
+  ;;
+  rc)
+    ser="${1}"
+    shift
+    cluster/pssh/cmd "${nds}" "${cluster_pssh_rc}/${ser} $*"
+  ;;
+  up)
+    cluster/pssh/cmd "${nds}" uptime
+  ;;
+  nscd)
+    for i in $* ; do
+      cluster/pssh/cmd "${nds}" "nscd -i ${i}"
+    done
+  ;;
+  help|*)
+    help/psshmgr
+  ;;
+esac

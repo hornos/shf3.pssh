@@ -1,0 +1,3 @@
+cluster_pssh="pssh"
+cluster_pssh_opt="-i -v -p 1"
+cluster_pssh_rc="/etc/rc.d"

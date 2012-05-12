@@ -1,0 +1,13 @@
+
+function cluster/pssh/cmd() {
+  local _nds="${1}"
+  shift
+  local _cmd="${*}"
+
+  if ! readable "${_nds}" ; then
+    msg "Nodes not found: ${_nds}"
+    $failure
+  fi
+
+  ${cluster_pssh} ${cluster_pssh_opt} -h "${_nds}" "${_cmd}"
+}
