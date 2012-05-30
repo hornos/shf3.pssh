@@ -67,7 +67,7 @@ case "${cmd}" in
   slurm)
     # TODO: reconfigure
     # TODO: slurm rc reconf
-    ser="${1}"
+    ser="${cmd}"
     shift
     answer "Restart service slurm on ${nds}?"
     if failed $? ; then
