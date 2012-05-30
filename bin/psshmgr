@@ -7,12 +7,13 @@ import cluster/pssh
 function help/psshmgr() {
   cat << EOF
 Usage: ${gbn} command ...
-              cmd  nodes commands - run commands on nodes
-              kill nodes what     - killall what proc on nodes
-              ps   nodes pattern  - grep ps for pattern on nodes
-              rc   nodes service action - do action on rc service on nodes
-              up   nodes          - show uptimes
-              nscd nodes ents     - invalidate nscd ent on nodes
+              cmd   nodes commands - run commands on nodes
+              kill  nodes what     - killall what proc on nodes
+              ps    nodes pattern  - grep ps for pattern on nodes
+              rc    nodes service action - do action on rc service on nodes
+              up    nodes          - show uptimes
+              nscd  nodes ents     - invalidate nscd ent on nodes
+              slurm nodes          - restart slurm
 EOF
   exit 1
 }
@@ -26,11 +27,21 @@ cmd="${1}"
 shift
 nds="${1}"
 shift
+
+answer "Execute ${cmd} on ${nds}?"
+if failed $? ; then
+  exit 1
+fi
+
 case "${cmd}" in
   cmd)
     cluster/pssh/cmd "${nds}" $*
   ;;
   kill)
+    answer "Kill ${*} on ${nds}?"
+    if failed $? ; then
+      exit 1
+    fi
     cluster/pssh/cmd "${nds}" "killall -9 $*"
   ;;
   ps)
@@ -39,6 +50,10 @@ case "${cmd}" in
   rc)
     ser="${1}"
     shift
+    answer "Restart service ${ser} on ${nds}?"
+    if failed $? ; then
+      exit 1
+    fi
     cluster/pssh/cmd "${nds}" "${cluster_pssh_rc}/${ser} $*"
   ;;
   up)
@@ -48,6 +63,17 @@ case "${cmd}" in
     for i in $* ; do
       cluster/pssh/cmd "${nds}" "nscd -i ${i}"
     done
+  ;;
+  slurm)
+    # TODO: reconfigure
+    # TODO: slurm rc reconf
+    ser="${1}"
+    shift
+    answer "Restart service slurm on ${nds}?"
+    if failed $? ; then
+      exit 1
+    fi
+    cluster/pssh/cmd "${nds}" "${cluster_pssh_rc}/${ser} $*"
   ;;
   help|*)
     help/psshmgr
