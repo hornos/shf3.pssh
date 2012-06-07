@@ -50,7 +50,7 @@ case "${cmd}" in
   rc)
     ser="${1}"
     shift
-    answer "Restart service ${ser} on ${nds}?"
+    answer "$* service ${ser} on ${nds}?"
     if failed $? ; then
       exit 1
     fi
